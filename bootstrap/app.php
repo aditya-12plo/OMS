@@ -24,8 +24,10 @@ $app = new Laravel\Lumen\Application(
 );
 
 // $app->withFacades();
-
-// $app->withEloquent();
+$app->withFacades(true, [
+    'Illuminate\Support\Facades\Mail' => 'Mail',
+]);
+$app->withEloquent();
 
 /*
 |--------------------------------------------------------------------------
@@ -71,6 +73,10 @@ $app->configure('app');
 | route or middleware that'll be assigned to some specific routes.
 |
 */
+$app->middleware([
+    App\Http\Middleware\ResponseMiddleware::class
+]);
+
 
 // $app->middleware([
 //     App\Http\Middleware\ExampleMiddleware::class
