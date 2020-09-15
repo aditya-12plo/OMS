@@ -2,6 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests;
+use Illuminate\Http\Request;
+use PDF;
+
+use App\Models\User;
+
 class IndexController extends Controller
 {
    	
@@ -25,5 +31,23 @@ error status code
 		return response()
 		->json(['status'=>200 ,'datas' => ['message' => 'API Order Management System'], 'errors' => []])
 		->setStatusCode(200);
+    }
+
+    public function pdf()
+    {
+
+      /**
+       * for save pdf file to server
+       */
+      // $html = "<h1>Test</h1>";
+      // return PDF::loadHTML($html)->setPaper('a4', 'landscape')->setWarnings(false)->save('pdf/coba.pdf');
+      
+
+      /**
+       * for download pdf file
+       */
+      $data = ["satu" => 1];
+      return PDF::setOptions(['isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true])->loadView('pdf.coba', $data)->download('invoice.pdf');
+
     }
 }

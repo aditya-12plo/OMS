@@ -62,6 +62,12 @@ $app->singleton(
 */
 
 $app->configure('app');
+$app->configure('dompdf');
+
+
+$app->register(\Barryvdh\DomPDF\ServiceProvider::class);
+class_alias('Barryvdh\DomPDF\Facade', 'PDF');
+
 
 /*
 |--------------------------------------------------------------------------

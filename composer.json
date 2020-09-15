@@ -1,11 +1,12 @@
 {
-    "name": "laravel/lumen",
-    "description": "The Laravel Lumen Framework.",
-    "keywords": ["framework", "laravel", "lumen"],
+    "name": "OMS (Order Management System)",
+    "description": "Order Management System By API (Aplikasi Pintar Indonesia).",
+    "keywords": ["api", "oms", "order" , "order management system"],
     "license": "MIT",
     "type": "project",
     "require": {
         "php": "^7.2.5",
+        "barryvdh/laravel-dompdf": "^0.8.7",
         "laravel/lumen-framework": "^7.0"
     },
     "require-dev": {
