@@ -17,7 +17,7 @@ class ResponseMiddleware
     {
         $response = $next($request);
         $response->header('X-Powered-By', env('APP_NAME'));
-        $response->header('Content-Type', "application/json");
+        // $response->header('Content-Type', "application/json");
         return $response;
     }
 }
