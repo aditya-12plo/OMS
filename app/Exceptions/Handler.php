@@ -8,6 +8,7 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
+use App\Models\Log;
 
 class Handler extends ExceptionHandler
 {
@@ -51,13 +52,39 @@ class Handler extends ExceptionHandler
     {
         // return parent::render($request, $exception);
 
-        $rendered = parent::render($request, $exception);
+        $rendered   = parent::render($request, $exception);
+        $url        = $request->path();
+        $hostname   = gethostname();
+        $message    = $exception->getMessage();
+        $level      = $rendered->getStatusCode();
+        $channel    = $config['name'] ?? env('APP_ENV');
+        $ip         = request()->server('REMOTE_ADDR');
+        $user_agent = request()->server('HTTP_USER_AGENT');
+        
+        Log::create([
+            'instance'      => $hostname,
+            'channel'       => $channel,
+            'message'       => $message,
+            'level'         => $level,
+            'ip'            => $ip,
+            'user_agent'    => $user_agent,
+            'url'           => $url,
+            'context'       => '',
+            'extra'         => ''
+
+        ]);
 
         return response()
-        ->json(['status'=>$rendered->getStatusCode() ,'datas' => [], 'errors' => ['code' => $rendered->getStatusCode() , 'message' => $exception->getMessage()]])
+        ->json([
+            'status'=>$level ,
+            'datas' => [], 
+            'errors' => [
+                'message' => $message, 
+            ]
+            ])
         ->withHeaders([
             'Content-Type'          => 'application/json',
             ])
-        ->setStatusCode($rendered->getStatusCode());
+        ->setStatusCode($level);
     }
 }

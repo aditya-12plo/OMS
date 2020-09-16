@@ -24,6 +24,7 @@ $router->group(['prefix' => 'root-system'], function () use ($router) {
     $router->get('/pdf',['as' => 'indexpdf','uses' => 'IndexController@pdf']);
     $router->get('/pdfencode',['as' => 'pdfencode','uses' => 'IndexController@pdfencode']);
     $router->get('/pdfdencode',['as' => 'pdfdencode','uses' => 'IndexController@pdfdencode']);
+    $router->get('/test-log',['as' => 'testLog','uses' => 'IndexController@testLog']);
 
 });
 

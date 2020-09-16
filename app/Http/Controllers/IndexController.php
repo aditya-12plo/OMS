@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
 use PDF;
 
 use App\Models\User;
@@ -205,4 +209,11 @@ error status code
    }
 
 
+
+   
+   public function testLog()
+   {
+    Log::info('Showing user: '.$id);
+    return 'ok';
+   }
 }
