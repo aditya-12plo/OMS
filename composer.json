@@ -1,5 +1,5 @@
 {
-    "name": "OMS (Order Management System)",
+    "name": "laravel/lumen",
     "description": "Order Management System By API (Aplikasi Pintar Indonesia).",
     "keywords": ["api", "oms", "order" , "order management system"],
     "license": "MIT",
@@ -9,7 +9,10 @@
         "barryvdh/laravel-dompdf": "^0.8.7",
         "itelmenko/laravel-mysql-logger": "^0.1.15",
         "laravel/lumen-framework": "^7.0",
-        "monolog/monolog": "^2.1"
+        "monolog/monolog": "^2.1",
+        "phpoffice/phpexcel": "^1.8",
+        "phpoffice/phpspreadsheet": "^1.14",
+        "ramsey/uuid": "^4.1"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.9.1",

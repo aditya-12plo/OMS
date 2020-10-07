@@ -10,6 +10,8 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\FirePHPHandler;
 use Log;
 use PDF;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 use App\Models\User;
 
@@ -211,9 +213,39 @@ error status code
 
 
    
+   public function downloadExcel()
+   {
+    $name         = "hello world.xlsx";
+    $avatar_path  = storage_path('xlsx') . '/' . $name;
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setCellValue('A1', 'Hello World !');
+    
+    $writer = new Xlsx($spreadsheet);
+    $writer->save($avatar_path);
+    $type = 'application/vnd.ms-excel';
+    $headers = ['Content-Type' => $type];
+    
+    if (file_exists($avatar_path)) {
+      $file = file_get_contents($avatar_path);
+      // for download file;
+      // return response()->download($file, $name, $headers);
+      return response($file, 200)->withHeaders(['Content-Type' => $type, 'Content-Disposition' => 'attachment;filename="'.$name.'"']);
+    }else{
+      echo $avatar_path;
+    }
+   }
+
+
+   
    public function testLog()
    {
-    Log::info('Showing user: '.$id);
-    return 'ok';
+    return response()
+    ->json(['status'=>200 ,'datas' => ['message' => 'API Order Management System'], 'errors' => []])
+    ->withHeaders([
+      'Content-Type'          => 'application/json',
+      ])
+		->setStatusCode(200);
    }
+
 }
