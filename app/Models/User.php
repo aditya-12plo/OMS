@@ -17,8 +17,9 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      *
      * @var array
      */
+    protected $primaryKey = 'user_id';
     protected $fillable = [
-        'name', 'email',
+        'name', 'phone', 'email','company_id','user_role_id'
     ];
 
     /**
@@ -27,6 +28,28 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var array
      */
     protected $hidden = [
-        'password',
+        'password','remember_token',
     ];
+	
+	
+    public function usersRole()
+    {
+        return $this->belongsTo('App\Models\UserRole','user_role_id');
+    }
+	
+    /**
+     * Get the record associated with the company.
+     */
+	
+    public function company()
+    {
+    	return $this->hasOne('App\Models\Company','company_id','company_id');
+    }
+	
+    public function role()
+    {
+    	return $this->hasOne('App\Models\UserRole','user_role_id','user_role_id');
+    }
+	
+	
 }

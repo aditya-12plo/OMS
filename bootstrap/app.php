@@ -85,7 +85,9 @@ class_alias('Barryvdh\DomPDF\Facade', 'PDF');
 $app->middleware([
     App\Http\Middleware\ResponseMiddleware::class
 ]);
-
+$app->middleware([
+    App\Http\Middleware\CorsMiddleware::class
+]);
 
 // $app->middleware([
 //     App\Http\Middleware\ExampleMiddleware::class

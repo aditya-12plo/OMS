@@ -14,6 +14,8 @@
 $router->get('/',['as' => 'index','uses' => 'IndexController@index']);
 
 
+$router->post('/login',['as' => 'userLogin','uses' => 'Auth\LoginController@authenticate']);
+
 
 
 $router->group(['prefix' => 'root-system'], function () use ($router) {
