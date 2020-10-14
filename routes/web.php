@@ -30,3 +30,12 @@ $router->group(['prefix' => 'root-system'], function () use ($router) {
 
 });
 
+
+$router->group(
+    ['middleware' => 'jwt.auth'], 
+    function() use ($router) {
+        $router->get('/fulfillment/index',['as' => 'fulfillmentIndex','uses' => 'FulfillmentCenterController@index']);
+        $router->get('/company/index',['as' => 'companyIndex','uses' => 'CompanyController@index']);
+    }
+);
+

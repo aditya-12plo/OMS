@@ -20,7 +20,7 @@ class LoginController extends BaseController {
     private function jwt(User $user) {
         
         $payload = [
-            'iss' => "lumen-jwt",
+            'iss' => "bearer",
             'sub' => $user,
             'iat' => time(),
             'exp' => time() + 1440*60 // token kadaluwarsa setelah 3600 detik
@@ -43,7 +43,7 @@ class LoginController extends BaseController {
              if($selectedUser->company->status === "ACTIVATE"){
 				$token = $this->jwt($selectedUser);
             
-				$data = ['token' => $token];
+				$data = ['token' => $token, 'type' => 'bearer'];
 				return response()
 				->json(['status'=>200 ,'datas' => $data, 'errors' => []])
 				->withHeaders([
