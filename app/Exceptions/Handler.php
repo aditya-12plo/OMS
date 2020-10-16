@@ -8,6 +8,8 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
+use Illuminate\Http\Response;
+
 use App\Models\Log;
 
 class Handler extends ExceptionHandler
@@ -47,7 +49,8 @@ class Handler extends ExceptionHandler
      * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
      *
      * @throws \Throwable
-     */
+	 */
+    
     public function render($request, Throwable $exception)
     {
         // return parent::render($request, $exception);
@@ -55,24 +58,31 @@ class Handler extends ExceptionHandler
         $rendered   = parent::render($request, $exception);
         $url        = $request->path();
         $hostname   = gethostname();
-        $message    = $exception->getMessage();
+		
+		if ($exception instanceof ValidationException) {
+			$message = json_decode($exception->getResponse()->content());
+		}else{
+			$message    = $exception->getMessage();
+		}
+		
+        
         $level      = $rendered->getStatusCode();
         $channel    = $config['name'] ?? env('APP_ENV');
         $ip         = request()->server('REMOTE_ADDR');
         $user_agent = request()->server('HTTP_USER_AGENT');
         
-        Log::create([
-            'instance'      => $hostname,
-            'channel'       => $channel,
-            'message'       => $message,
-            'level'         => $level,
-            'ip'            => $ip,
-            'user_agent'    => $user_agent,
-            'url'           => $url,
-            'context'       => '',
-            'extra'         => ''
+        // Log::create([
+            // 'instance'      => $hostname,
+            // 'channel'       => $channel,
+            // 'message'       => $message,
+            // 'level'         => $level,
+            // 'ip'            => $ip,
+            // 'user_agent'    => $user_agent,
+            // 'url'           => $url,
+            // 'context'       => $exception,
+            // 'extra'         => $request
 
-        ]);
+        // ]);
 
         return response()
         ->json([
@@ -87,4 +97,21 @@ class Handler extends ExceptionHandler
             ])
         ->setStatusCode($level);
     }
+	 
+	 /*
+	 
+	  public function render($request, Throwable $e){
+		$rendered = parent::render($request, $e);
+		$statusCode = $rendered->getstatuscode();
+		$errorResponse = [
+			'error' => true,
+			'code' => $statusCode,
+			'message' => $e->getmessage(),
+		];
+		if ($e instanceof ValidationException) {
+			$errorResponse['message'] = json_decode($e->getResponse()->content());
+		}
+		return response()->json($errorResponse, $statusCode);
+	  }
+	  */
 }

@@ -110,9 +110,19 @@ $app->routeMiddleware([
 |
 */
 
-// $app->register(App\Providers\AppServiceProvider::class);
+$app->register(App\Providers\AppServiceProvider::class);
+$app->register(App\Providers\EventServiceProvider::class);
 // $app->register(App\Providers\AuthServiceProvider::class);
-// $app->register(App\Providers\EventServiceProvider::class);
+
+/*
+|--------------------------------------------------------------------------
+| Load The Langauage
+|--------------------------------------------------------------------------
+*/
+
+app('translator')->setLocale(env('APP_LOCALE', 'id'));
+
+
 
 /*
 |--------------------------------------------------------------------------

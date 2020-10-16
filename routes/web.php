@@ -34,7 +34,19 @@ $router->group(['prefix' => 'root-system'], function () use ($router) {
 $router->group(
     ['middleware' => 'jwt.auth'], 
     function() use ($router) {
+		
+		/*
+		*	Country
+		*/
+		$router->get('/country/index',['as' => 'countryIndex','uses' => 'CountryController@index']);
+		
+		/*
+		*	Fulfillment
+		*/
         $router->get('/fulfillment/index',['as' => 'fulfillmentIndex','uses' => 'FulfillmentCenterController@index']);
+        $router->post('/fulfillment/add',['as' => 'fulfillmentAdd','uses' => 'FulfillmentCenterController@store']);
+		
+		
         $router->get('/company/index',['as' => 'companyIndex','uses' => 'CompanyController@index']);
     }
 );
