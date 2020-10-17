@@ -63,6 +63,139 @@ class CompanyController extends Controller
     }
 	
 	
+    public function store(Request $request){
+		
+		$this->validate($request, [
+            'company_code' 			=> 'required|max:255|without_spaces',
+            'company_name' 			=> 'required|max:255',
+            'address' 				=> 'required',
+            'province' 				=> 'required|max:255',
+            'city' 					=> 'required|max:255',
+            'area' 					=> 'max:255',
+            'sub_area' 				=> 'max:255',
+            'village' 				=> 'max:255',
+            'postal_code' 			=> 'required|max:6|without_spaces',
+            'status' 				=> 'required|in:ACTIVATE,DEACTIVATE',
+            'pic_name' 				=> 'required|max:255',
+            'pic_phone' 			=> 'max:10',
+            'pic_fax' 				=> 'max:12',
+            'country' 				=> 'required|max:255',
+            'pic_email' 			=> 'max:255|email',
+            'pic_mobile' 			=> 'max:12'
+        ]);
+		
+		$check	= Company::where("company_id",$request->company_code)->first();
+		if($check){
+			
+			return response()
+				->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ["company_code" => ["Company Code must be unique."]]]])
+				->withHeaders([
+				  'Content-Type'          => 'application/json',
+				  ])
+				->setStatusCode(422);
+		}else{
+		
+			$send = array(
+				'company_id' 	=> $request->company_code,
+				'name' 			=> $request->company_name,
+				'address' 		=> $request->address,
+				'address2' 		=> $request->address2,
+				'province' 		=> $request->province,
+				'city' 			=> $request->city,
+				'area' 			=> $request->area,
+				'sub_area' 		=> $request->sub_area,
+				'village' 		=> $request->village,
+				'postal_code' 	=> $request->postal_code,
+				'country' 		=> $request->country,
+				'remarks' 		=> $request->remarks,
+				'pic' 			=> $request->pic_name,
+				'phone' 		=> $request->pic_phone,
+				'mobile' 		=> $request->pic_mobile,
+				'fax' 			=> $request->pic_fax,
+				'email' 		=> $request->pic_email,
+				'status' 		=> $request->status
+				); 
+			Company::create($send);
+			
+			
+			return response()
+				->json(['status'=>200 ,'datas' => ['message' => 'Add Successfully'], 'errors' => []])
+				->withHeaders([
+				  'Content-Type'          => 'application/json',
+				  ])
+				->setStatusCode(200);
+			
+		}
+			
+	}
+	
+    public function update(Request $request, $id){
+		$auth	= $request->auth;
+		$cek 	= Company::findOrFail($id);
+		
+		if(!$cek){
+			
+			return response()
+					->json(['status'=>400 ,'datas' => [], 'errors' => ['fulfillment_center_id' => 'Data not available']])
+					->withHeaders([
+					  'Content-Type'          => 'application/json',
+					  ])
+					->setStatusCode(400);
+				
+		}else{
+			$this->validate($request, [
+				'company_name' 			=> 'required|max:255',  
+				'address' 				=> 'required',  
+				'province' 				=> 'required|max:255',  
+				'city' 					=> 'required|max:255',  
+				'area' 					=> 'max:255',  
+				'sub_area' 				=> 'max:255',  
+				'village' 				=> 'max:255',  
+				'postal_code' 			=> 'required|max:6|without_spaces', 
+				'longitude' 			=> 'max:255',  
+				'latitude' 				=> 'max:255',  
+				'status' 				=> 'required|in:ACTIVATE,DEACTIVATE',  
+				'pic_name' 				=> 'required|max:255',  
+				'pic_phone' 			=> 'max:10',  
+				'pic_fax' 				=> 'max:12',  
+				'country' 				=> 'required|max:255',  
+				'pic_email' 			=> 'max:255|email',  
+				'pic_mobile' 			=> 'max:12'
+			]);
+			
+			$send = array(
+				'name' 			=> $request->company_name,
+				'address' 		=> $request->address,
+				'address2' 		=> $request->address2,
+				'province' 		=> $request->province,
+				'city' 			=> $request->city,
+				'area' 			=> $request->area,
+				'sub_area' 		=> $request->sub_area,
+				'village' 		=> $request->village,
+				'postal_code' 	=> $request->postal_code,
+				'country' 		=> $request->country,
+				'latitude' 		=> $request->latitude,
+				'longitude' 	=> $request->longitude,
+				'remarks' 		=> $request->remarks,
+				'pic' 			=> $request->pic_name,
+				'phone' 		=> $request->pic_phone,
+				'mobile' 		=> $request->pic_mobile,
+				'fax' 			=> $request->pic_fax,
+				'email' 		=> $request->pic_email,
+				'status' 		=> $request->status
+			); 
+				
+			$cek->update($send);
+			
+			return response()
+					->json(['status'=>200 ,'datas' => ['message' => 'Update Successfully'], 'errors' => []])
+					->withHeaders([
+					  'Content-Type'          => 'application/json',
+					  ])
+					->setStatusCode(200);
+			
+		}		
+	}
 	
     public function updateStatus(Request $request, $id){
 		$auth	= $request->auth;

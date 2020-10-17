@@ -88,7 +88,7 @@ class FulfillmentCenterController extends Controller
             'status' 				=> 'required|in:ACTIVATE,DEACTIVATE',  
             'pic_name' 				=> 'required|max:255',  
             'pic_phone' 			=> 'max:10',  
-            'pic_faximile' 			=> 'max:12',  
+            'pic_fax' 				=> 'max:12',  
             'country' 				=> 'required|max:255',  
             'pic_email' 			=> 'max:255|email',  
             'company' 				=> 'required|max:255',
@@ -125,7 +125,7 @@ class FulfillmentCenterController extends Controller
 				'pic' 			=> $request->pic_name,
 				'phone' 		=> $request->pic_phone,
 				'mobile' 		=> $request->pic_mobile,
-				'fax' 			=> $request->pic_faximile,
+				'fax' 			=> $request->pic_fax,
 				'email' 		=> $request->pic_email,
 				'status' 		=> $request->status
 				); 
@@ -173,7 +173,7 @@ class FulfillmentCenterController extends Controller
 				'status' 				=> 'required|in:ACTIVATE,DEACTIVATE',  
 				'pic_name' 				=> 'required|max:255',  
 				'pic_phone' 			=> 'max:10',  
-				'pic_faximile' 			=> 'max:12',  
+				'pic_fax' 				=> 'max:12',  
 				'country' 				=> 'required|max:255',  
 				'pic_email' 			=> 'max:255|email',  
 				'company' 				=> 'required|max:255',
@@ -209,7 +209,7 @@ class FulfillmentCenterController extends Controller
 				'pic' 			=> $request->pic_name,
 				'phone' 		=> $request->pic_phone,
 				'mobile' 		=> $request->pic_mobile,
-				'fax' 			=> $request->pic_faximile,
+				'fax' 			=> $request->pic_fax,
 				'email' 		=> $request->pic_email,
 				'status' 		=> $request->status
 				); 
