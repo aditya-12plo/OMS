@@ -45,9 +45,18 @@ $router->group(
 		*/
         $router->get('/fulfillment/index',['as' => 'fulfillmentIndex','uses' => 'FulfillmentCenterController@index']);
         $router->post('/fulfillment/add',['as' => 'fulfillmentAdd','uses' => 'FulfillmentCenterController@store']);
+        $router->put('/fulfillment/update/{id}',['as' => 'fulfillmentUpdate','uses' => 'FulfillmentCenterController@update']);
+        $router->put('/fulfillment/update-status/{id}',['as' => 'fulfillmentUpdate','uses' => 'FulfillmentCenterController@updateStatus']);
 		
-		
+		/*
+		*	Company
+		*/
         $router->get('/company/index',['as' => 'companyIndex','uses' => 'CompanyController@index']);
+        $router->post('/company/add',['as' => 'companyAdd','uses' => 'CompanyController@store']);
+        $router->put('/company/update/{id}',['as' => 'companyUpdate','uses' => 'CompanyController@update']);
+        $router->put('/company/update-status/{id}',['as' => 'companyUpdate','uses' => 'CompanyController@updateStatus']);
+		
+		
     }
 );
 
