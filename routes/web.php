@@ -56,6 +56,17 @@ $router->group(
         $router->put('/company/update/{id}',['as' => 'companyUpdate','uses' => 'CompanyController@update']);
         $router->put('/company/update-status/{id}',['as' => 'companyUpdate','uses' => 'CompanyController@updateStatus']);
 		
+		/*
+		*	Products
+		*/
+        $router->get('/products/normal/index',['as' => 'productIndex','uses' => 'ProductsController@normalProducts']);
+        $router->put('/products/normal/update/{id}',['as' => 'productUpdate','uses' => 'ProductsController@normalUpdateProducts']);
+        $router->post('/products/normal/add',['as' => 'productAdd','uses' => 'ProductsController@normalAddProducts']);
+		
+		/*
+		*	UOM
+		*/
+        $router->get('/uom/index',['as' => 'uomIndex','uses' => 'UomController@index']);
 		
     }
 );

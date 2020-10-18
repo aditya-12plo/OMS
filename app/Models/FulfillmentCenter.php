@@ -20,4 +20,10 @@ class FulfillmentCenter extends Model
     {
     	return $this->hasOne('App\Models\Company','company_id','company_id');
     }
+	
+    public function inventorys()
+    {
+		return $this->hasMany('App\Models\Inventory','fulfillment_center_id');
+        
+    }
 }

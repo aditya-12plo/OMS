@@ -105,35 +105,33 @@ class FulfillmentCenterController extends Controller
 				  ])
 				->setStatusCode(422);
 		}else{
-		
-			$send = array(
-				'company_id' 	=> $request->company,
-				'code' 			=> $request->fulfillment_code,
-				'name' 			=> $request->fulfillment_name,
-				'address' 		=> $request->address,
-				'address2' 		=> $request->address2,
-				'province' 		=> $request->province,
-				'city' 			=> $request->city,
-				'area' 			=> $request->area,
-				'sub_area' 		=> $request->sub_area,
-				'village' 		=> $request->village,
-				'postal_code' 	=> $request->postal_code,
-				'country' 		=> $request->country,
-				'latitude' 		=> $request->latitude,
-				'longitude' 	=> $request->longitude,
-				'remarks' 		=> $request->remarks,
-				'pic' 			=> $request->pic_name,
-				'phone' 		=> $request->pic_phone,
-				'mobile' 		=> $request->pic_mobile,
-				'fax' 			=> $request->pic_fax,
-				'email' 		=> $request->pic_email,
-				'status' 		=> $request->status
-				); 
-			FulfillmentCenter::create($send);
-			
+				
+			$data 						= new FulfillmentCenter;
+			$data->company_id 			= $request->company;
+			$data->code 				= $request->fulfillment_code;
+			$data->name 				= $request->fulfillment_name;
+			$data->address	 			= $request->address;
+			$data->address2 			= $request->address2;
+			$data->province 			= $request->province;
+			$data->city				 	= $request->city;
+			$data->area 				= $request->area;
+			$data->sub_area				= $request->sub_area;
+			$data->village 				= $request->village;
+			$data->postal_code			= $request->postal_code;
+			$data->country 				= $request->country;
+			$data->latitude				= $request->latitude;
+			$data->longitude			= $request->longitude;
+			$data->remarks				= $request->remarks;
+			$data->pic					= $request->pic_name;
+			$data->phone				= $request->pic_phone;
+			$data->mobile				= $request->pic_mobile;
+			$data->fax					= $request->pic_fax;
+			$data->email				= $request->pic_email;
+			$data->status				= $request->status;
+			$data->save();
 			
 			return response()
-				->json(['status'=>200 ,'datas' => ['message' => 'Add Successfully'], 'errors' => []])
+				->json(['status'=>200 ,'datas' => ['message' => 'Add Successfully', 'datas' => $data], 'errors' => []])
 				->withHeaders([
 				  'Content-Type'          => 'application/json',
 				  ])
