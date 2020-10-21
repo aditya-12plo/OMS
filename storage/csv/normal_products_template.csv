@@ -1,0 +1,2 @@
+product_code,product_name,uom_code,price,width,height,weight,net_weight,gross_weight,qty_per_carton,carton_per_pallet,cube,currency,barcode,time_to_live
+SKU1,SKU 1,EA,1000,1,1,1,1,1,1,1,1,IDR,,0

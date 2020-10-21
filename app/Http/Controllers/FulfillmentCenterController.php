@@ -32,7 +32,6 @@ class FulfillmentCenterController extends Controller
         $sort_field     		= $request->sort_field;
         $sort_type      		= $request->sort_type;
 		
-        $company_id     		= $request->company_id;
         $code     				= $request->code;
         $name     				= $request->name;
         $status     			= $request->status;
@@ -42,120 +41,53 @@ class FulfillmentCenterController extends Controller
             $sort_type = "DESC";
         }
 		
-		if($auth->company_id == "OMS"){
-			$query = FulfillmentCenter::with('company')->orderBy($sort_field,$sort_type);
-		}else{
-			$query = FulfillmentCenter::where('company_id', $auth->company_id)->with('company')->orderBy($sort_field,$sort_type);			
-		}
+			$query = FulfillmentCenter::orderBy($sort_field,$sort_type);
+			
+			
+			if ($code) {
+				$like = "%{$code}%";
+				$query = $query->where('code', 'LIKE', $like);
+			}
+			
+			if ($name) {
+				$like = "%{$name}%";
+				$query = $query->where('name', 'LIKE', $like);
+			}
+			
+			if ($status) {
+				$query = $query->where('status',  $status);
+			}
+			
+			return $query->paginate($perPage);
 		
-		if ($company_id) {
-            $like = "%{$company_id}%";
-            $query = $query->where('company_id', 'LIKE', $like);
-        }
-		
-		if ($code) {
-            $like = "%{$code}%";
-            $query = $query->where('code', 'LIKE', $like);
-        }
-		
-		if ($name) {
-            $like = "%{$name}%";
-            $query = $query->where('name', 'LIKE', $like);
-        }
-		
-		if ($status) {
-            $query = $query->where('status',  $status);
-        }
-		
-		return $query->paginate($perPage);
     }
 	
 	
-    public function store(Request $request){
-		
-		$this->validate($request, [
-            'fulfillment_code' 		=> 'required|max:255|without_spaces', 
-            'fulfillment_name' 		=> 'required|max:255',  
-            'address' 				=> 'required',  
-            'province' 				=> 'required|max:255',  
-            'city' 					=> 'required|max:255',  
-            'area' 					=> 'max:255',  
-            'sub_area' 				=> 'max:255',  
-            'village' 				=> 'max:255',  
-            'postal_code' 			=> 'required|max:6|without_spaces', 
-            'longitude' 			=> 'max:255',  
-            'latitude' 				=> 'max:255',  
-            'status' 				=> 'required|in:ACTIVATE,DEACTIVATE',  
-            'pic_name' 				=> 'required|max:255',  
-            'pic_phone' 			=> 'max:10',  
-            'pic_fax' 				=> 'max:12',  
-            'country' 				=> 'required|max:255',  
-            'pic_email' 			=> 'max:255|email',  
-            'company' 				=> 'required|max:255',
-            'pic_mobile' 			=> 'max:12'
-        ]);
-		
-		$check	= FulfillmentCenter::where([["company_id",$request->company],["code",$request->fulfillment_code]])->first();
-		if($check){
-			
-			return response()
-				->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ["fulfillment_code" => ["Fulfillment Code must be unique."]]]])
-				->withHeaders([
-				  'Content-Type'          => 'application/json',
-				  ])
-				->setStatusCode(422);
-		}else{
-				
-			$data 						= new FulfillmentCenter;
-			$data->company_id 			= $request->company;
-			$data->code 				= $request->fulfillment_code;
-			$data->name 				= $request->fulfillment_name;
-			$data->address	 			= $request->address;
-			$data->address2 			= $request->address2;
-			$data->province 			= $request->province;
-			$data->city				 	= $request->city;
-			$data->area 				= $request->area;
-			$data->sub_area				= $request->sub_area;
-			$data->village 				= $request->village;
-			$data->postal_code			= $request->postal_code;
-			$data->country 				= $request->country;
-			$data->latitude				= $request->latitude;
-			$data->longitude			= $request->longitude;
-			$data->remarks				= $request->remarks;
-			$data->pic					= $request->pic_name;
-			$data->phone				= $request->pic_phone;
-			$data->mobile				= $request->pic_mobile;
-			$data->fax					= $request->pic_fax;
-			$data->email				= $request->pic_email;
-			$data->status				= $request->status;
-			$data->save();
-			
-			return response()
-				->json(['status'=>200 ,'datas' => ['message' => 'Add Successfully', 'datas' => $data], 'errors' => []])
-				->withHeaders([
-				  'Content-Type'          => 'application/json',
-				  ])
-				->setStatusCode(200);
-			
-		}
-			
-	}
-
-	
-    public function update(Request $request, $id){
+    public function detail(Request $request, $id){
 		$auth	= $request->auth;
-		$cek 	= FulfillmentCenter::findOrFail($id);
-		
-		if(!$cek){
-			
+		$query = FulfillmentCenter::where("fulfillment_center_id",$id)->first();
+		if($query){
 			return response()
-					->json(['status'=>400 ,'datas' => [], 'errors' => ['fulfillment_center_id' => 'Data not available']])
+					->json(['status'=>200 ,'datas' => $query, 'errors' => []])
 					->withHeaders([
 					  'Content-Type'          => 'application/json',
 					  ])
-					->setStatusCode(400);
-				
+					->setStatusCode(200);
 		}else{
+			return response()
+						->json(['status'=>404 ,'datas' => [], 'errors' => ['message' => ["product_code" => ["Fulfillment Not Found."]]]])
+						->withHeaders([
+						  'Content-Type'          => 'application/json',
+						  ])
+						->setStatusCode(404);
+			
+		}
+	}
+	
+	
+    public function store(Request $request){
+		$auth					= $request->auth;
+		if($auth->company_id == "OMS" && $auth->user_role_id == "ADMIN"){
 			$this->validate($request, [
 				'fulfillment_code' 		=> 'required|max:255|without_spaces', 
 				'fulfillment_name' 		=> 'required|max:255',  
@@ -173,89 +105,198 @@ class FulfillmentCenterController extends Controller
 				'pic_phone' 			=> 'max:10',  
 				'pic_fax' 				=> 'max:12',  
 				'country' 				=> 'required|max:255',  
-				'pic_email' 			=> 'max:255|email',  
-				'company' 				=> 'required|max:255',
+				'pic_email' 			=> 'max:255|email',
 				'pic_mobile' 			=> 'max:12'
 			]);
 			
-			$checkCode	= FulfillmentCenter::where([["company_id",$request->company],["code",$request->fulfillment_code]])->whereNotIn('fulfillment_center_id', [$id])->first();
-			if($checkCode){
+			$check	= FulfillmentCenter::where("code",$request->fulfillment_code)->first();
+			if($check){
+				
 				return response()
-					->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ["fulfillment_code" => ["Fulfillment Code has been registered."]]]])
+					->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ["fulfillment_code" => ["Fulfillment Code must be unique."]]]])
 					->withHeaders([
 					  'Content-Type'          => 'application/json',
 					  ])
 					->setStatusCode(422);
-				
 			}else{
-				$send = array(
-				'company_id' 	=> $request->company,
-				'code' 			=> $request->fulfillment_code,
-				'name' 			=> $request->fulfillment_name,
-				'address' 		=> $request->address,
-				'address2' 		=> $request->address2,
-				'province' 		=> $request->province,
-				'city' 			=> $request->city,
-				'area' 			=> $request->area,
-				'sub_area' 		=> $request->sub_area,
-				'village' 		=> $request->village,
-				'postal_code' 	=> $request->postal_code,
-				'country' 		=> $request->country,
-				'latitude' 		=> $request->latitude,
-				'longitude' 	=> $request->longitude,
-				'remarks' 		=> $request->remarks,
-				'pic' 			=> $request->pic_name,
-				'phone' 		=> $request->pic_phone,
-				'mobile' 		=> $request->pic_mobile,
-				'fax' 			=> $request->pic_fax,
-				'email' 		=> $request->pic_email,
-				'status' 		=> $request->status
-				); 
+					
+				$data 						= new FulfillmentCenter;
+				$data->code 				= $request->fulfillment_code;
+				$data->name 				= $request->fulfillment_name;
+				$data->address	 			= $request->address;
+				$data->address2 			= $request->address2;
+				$data->province 			= $request->province;
+				$data->city				 	= $request->city;
+				$data->area 				= $request->area;
+				$data->sub_area				= $request->sub_area;
+				$data->village 				= $request->village;
+				$data->postal_code			= $request->postal_code;
+				$data->country 				= $request->country;
+				$data->latitude				= $request->latitude;
+				$data->longitude			= $request->longitude;
+				$data->remarks				= $request->remarks;
+				$data->pic					= $request->pic_name;
+				$data->phone				= $request->pic_phone;
+				$data->mobile				= $request->pic_mobile;
+				$data->fax					= $request->pic_fax;
+				$data->email				= $request->pic_email;
+				$data->status				= $request->status;
+				$data->save();
 				
-				$cek->update($send);
-			
 				return response()
-					->json(['status'=>200 ,'datas' => ['message' => 'Update Successfully'], 'errors' => []])
+					->json(['status'=>200 ,'datas' => ['message' => 'Add Successfully', 'datas' => $data], 'errors' => []])
 					->withHeaders([
 					  'Content-Type'          => 'application/json',
 					  ])
 					->setStatusCode(200);
+				
 			}
+		}else{
+			
+			return response()
+				->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ["fulfillment_code" => ["No have Access."]]]])
+				->withHeaders([
+				  'Content-Type'          => 'application/json',
+				  ])
+				->setStatusCode(422);
+		}
+			
+	}
+
+	
+    public function update(Request $request, $id){
+		$auth					= $request->auth;
+		if($auth->company_id == "OMS" && $auth->user_role_id == "ADMIN"){
+			$auth	= $request->auth;
+			$cek 	= FulfillmentCenter::findOrFail($id);
+			
+			if(!$cek){
+				
+				return response()
+						->json(['status'=>400 ,'datas' => [], 'errors' => ['fulfillment_center_id' => 'Data not available']])
+						->withHeaders([
+						  'Content-Type'          => 'application/json',
+						  ])
+						->setStatusCode(400);
+					
+			}else{
+				$this->validate($request, [
+					'fulfillment_code' 		=> 'required|max:255|without_spaces', 
+					'fulfillment_name' 		=> 'required|max:255',  
+					'address' 				=> 'required',  
+					'province' 				=> 'required|max:255',  
+					'city' 					=> 'required|max:255',  
+					'area' 					=> 'max:255',  
+					'sub_area' 				=> 'max:255',  
+					'village' 				=> 'max:255',  
+					'postal_code' 			=> 'required|max:6|without_spaces', 
+					'longitude' 			=> 'max:255',  
+					'latitude' 				=> 'max:255',  
+					'status' 				=> 'required|in:ACTIVATE,DEACTIVATE',  
+					'pic_name' 				=> 'required|max:255',  
+					'pic_phone' 			=> 'max:10',  
+					'pic_fax' 				=> 'max:12',  
+					'country' 				=> 'required|max:255',  
+					'pic_email' 			=> 'max:255|email',  
+					'pic_mobile' 			=> 'max:12'
+				]);
+				
+				$checkCode	= FulfillmentCenter::where("code",$request->fulfillment_code)->whereNotIn('fulfillment_center_id', [$id])->first();
+				if($checkCode){
+					return response()
+						->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ["fulfillment_code" => ["Fulfillment Code has been registered."]]]])
+						->withHeaders([
+						  'Content-Type'          => 'application/json',
+						  ])
+						->setStatusCode(422);
+					
+				}else{
+					$send = array(
+					'code' 			=> $request->fulfillment_code,
+					'name' 			=> $request->fulfillment_name,
+					'address' 		=> $request->address,
+					'address2' 		=> $request->address2,
+					'province' 		=> $request->province,
+					'city' 			=> $request->city,
+					'area' 			=> $request->area,
+					'sub_area' 		=> $request->sub_area,
+					'village' 		=> $request->village,
+					'postal_code' 	=> $request->postal_code,
+					'country' 		=> $request->country,
+					'latitude' 		=> $request->latitude,
+					'longitude' 	=> $request->longitude,
+					'remarks' 		=> $request->remarks,
+					'pic' 			=> $request->pic_name,
+					'phone' 		=> $request->pic_phone,
+					'mobile' 		=> $request->pic_mobile,
+					'fax' 			=> $request->pic_fax,
+					'email' 		=> $request->pic_email,
+					'status' 		=> $request->status
+					); 
+					
+					$cek->update($send);
+				
+					return response()
+						->json(['status'=>200 ,'datas' => ['message' => 'Update Successfully'], 'errors' => []])
+						->withHeaders([
+						  'Content-Type'          => 'application/json',
+						  ])
+						->setStatusCode(200);
+				}
+			}
+		}else{
+			return response()
+						->json(['status'=>404 ,'datas' => [], 'errors' => ['message' => ["product_code" => ["Fulfillment Not Found."]]]])
+						->withHeaders([
+						  'Content-Type'          => 'application/json',
+						  ])
+						->setStatusCode(404);
+			
 		}		
 	}
 
 	
     public function updateStatus(Request $request, $id){
 		$auth	= $request->auth;
-		$cek 	= FulfillmentCenter::findOrFail($id);
-		
-		if(!$cek){
+			if($auth->company_id == "OMS" && $auth->user_role_id == "ADMIN"){
+			$cek 	= FulfillmentCenter::findOrFail($id);
 			
-			return response()
-					->json(['status'=>400 ,'datas' => [], 'errors' => ['fulfillment_center_id' => 'Data not available']])
-					->withHeaders([
-					  'Content-Type'          => 'application/json',
-					  ])
-					->setStatusCode(400);
+			if(!$cek){
 				
+				return response()
+						->json(['status'=>400 ,'datas' => [], 'errors' => ['fulfillment_center_id' => 'Data not available']])
+						->withHeaders([
+						  'Content-Type'          => 'application/json',
+						  ])
+						->setStatusCode(400);
+					
+			}else{
+				$this->validate($request, [
+					'status' 				=> 'required|in:ACTIVATE,DEACTIVATE'
+				]);
+				
+				$send = array(
+					'status' 		=> $request->status
+					); 
+					
+				$cek->update($send);
+				
+				return response()
+						->json(['status'=>200 ,'datas' => ['message' => 'Update Successfully'], 'errors' => []])
+						->withHeaders([
+						  'Content-Type'          => 'application/json',
+						  ])
+						->setStatusCode(200);
+			}
 		}else{
-			$this->validate($request, [
-				'status' 				=> 'required|in:ACTIVATE,DEACTIVATE'
-			]);
-			
-			$send = array(
-				'status' 		=> $request->status
-				); 
-				
-			$cek->update($send);
-			
 			return response()
-					->json(['status'=>200 ,'datas' => ['message' => 'Update Successfully'], 'errors' => []])
-					->withHeaders([
-					  'Content-Type'          => 'application/json',
-					  ])
-					->setStatusCode(200);
-		}		
+						->json(['status'=>404 ,'datas' => [], 'errors' => ['message' => ["product_code" => ["Fulfillment Not Found."]]]])
+						->withHeaders([
+						  'Content-Type'          => 'application/json',
+						  ])
+						->setStatusCode(404);
+			
+		}				
 	}
 	
 	

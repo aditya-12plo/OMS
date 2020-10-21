@@ -63,6 +63,37 @@ class CompanyController extends Controller
     }
 	
 	
+    public function detail(Request $request, $id){
+		$auth	= $request->auth;
+		$query = Company::where("company_id",$id)->first();
+		if($query){
+			if($auth->company_id == "OMS" || $auth->company_id == $request->company){
+				return response()
+					->json(['status'=>200 ,'datas' => $query, 'errors' => []])
+					->withHeaders([
+					  'Content-Type'          => 'application/json',
+					  ])
+					->setStatusCode(200);
+			}else{
+				return response()
+							->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ["product_code" => ["Product Id not registered."]]]])
+							->withHeaders([
+							  'Content-Type'          => 'application/json',
+							  ])
+							->setStatusCode(422);
+				
+			}
+		}else{
+			return response()
+						->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ["product_code" => ["Product Id not registered."]]]])
+						->withHeaders([
+						  'Content-Type'          => 'application/json',
+						  ])
+						->setStatusCode(422);
+		}
+	}
+	
+	
     public function store(Request $request){
 		
 		$this->validate($request, [

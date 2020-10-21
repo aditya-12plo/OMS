@@ -35,15 +35,19 @@ $router->group(
     ['middleware' => 'jwt.auth'], 
     function() use ($router) {
 		
+		
 		/*
-		*	Country
+		*	address
 		*/
 		$router->get('/country/index',['as' => 'countryIndex','uses' => 'CountryController@index']);
+		$router->get('/province/index',['as' => 'provinceIndex','uses' => 'AddressController@province']);
+		$router->get('/city/index',['as' => 'cityIndex','uses' => 'AddressController@city']);
 		
 		/*
 		*	Fulfillment
 		*/
         $router->get('/fulfillment/index',['as' => 'fulfillmentIndex','uses' => 'FulfillmentCenterController@index']);
+        $router->get('/fulfillment/detail/{id}',['as' => 'fulfillmentDetail','uses' => 'FulfillmentCenterController@detail']);
         $router->post('/fulfillment/add',['as' => 'fulfillmentAdd','uses' => 'FulfillmentCenterController@store']);
         $router->put('/fulfillment/update/{id}',['as' => 'fulfillmentUpdate','uses' => 'FulfillmentCenterController@update']);
         $router->put('/fulfillment/update-status/{id}',['as' => 'fulfillmentUpdate','uses' => 'FulfillmentCenterController@updateStatus']);
@@ -52,6 +56,7 @@ $router->group(
 		*	Company
 		*/
         $router->get('/company/index',['as' => 'companyIndex','uses' => 'CompanyController@index']);
+        $router->get('/company/detail/{id}',['as' => 'companyDetail','uses' => 'CompanyController@detail']);
         $router->post('/company/add',['as' => 'companyAdd','uses' => 'CompanyController@store']);
         $router->put('/company/update/{id}',['as' => 'companyUpdate','uses' => 'CompanyController@update']);
         $router->put('/company/update-status/{id}',['as' => 'companyUpdate','uses' => 'CompanyController@updateStatus']);
@@ -59,9 +64,12 @@ $router->group(
 		/*
 		*	Products
 		*/
-        $router->get('/products/normal/index',['as' => 'productIndex','uses' => 'ProductsController@normalProducts']);
-        $router->put('/products/normal/update/{id}',['as' => 'productUpdate','uses' => 'ProductsController@normalUpdateProducts']);
-        $router->post('/products/normal/add',['as' => 'productAdd','uses' => 'ProductsController@normalAddProducts']);
+        $router->get('/products/normal/template/{type}',['as' => 'templateNormalProducts','uses' => 'FilesController@productDownload']);
+        $router->post('/products/normal/upload',['as' => 'uploadNormalProducts','uses' => 'ProductsController@uploadNormalProducts']);
+        $router->get('/products/normal/index',['as' => 'normalProducts','uses' => 'ProductsController@normalProducts']);
+        $router->get('/products/normal/detail/{id}',['as' => 'normalDetailProducts','uses' => 'ProductsController@normalDetailProducts']);
+        $router->put('/products/normal/update/{id}',['as' => 'normalUpdateProducts','uses' => 'ProductsController@normalUpdateProducts']);
+        $router->post('/products/normal/add',['as' => 'normalAddProducts','uses' => 'ProductsController@normalAddProducts']);
 		
 		/*
 		*	UOM

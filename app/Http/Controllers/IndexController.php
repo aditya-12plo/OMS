@@ -145,6 +145,7 @@ error status code
 
     private function getFileMimeType($extension) {
       $mimet = array( 
+          'csv' => 'text/csv',
           'txt' => 'text/plain',
           'htm' => 'text/html',
           'html' => 'text/html',

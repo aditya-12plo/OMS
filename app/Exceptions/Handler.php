@@ -71,18 +71,18 @@ class Handler extends ExceptionHandler
         $ip         = request()->server('REMOTE_ADDR');
         $user_agent = request()->server('HTTP_USER_AGENT');
         
-        // Log::create([
-            // 'instance'      => $hostname,
-            // 'channel'       => $channel,
-            // 'message'       => $message,
-            // 'level'         => $level,
-            // 'ip'            => $ip,
-            // 'user_agent'    => $user_agent,
-            // 'url'           => $url,
-            // 'context'       => $exception,
-            // 'extra'         => $request
+        Log::create([
+            'instance'      => $hostname,
+            'channel'       => $channel,
+            'message'       => $message,
+            'level'         => $level,
+            'ip'            => $ip,
+            'user_agent'    => $user_agent,
+            'url'           => $url,
+            'context'       => $exception,
+            'extra'         => $request
 
-        // ]);
+        ]);
 
         return response()
         ->json([
