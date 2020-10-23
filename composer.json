@@ -15,7 +15,9 @@
         "monolog/monolog": "^2.1",
         "phpoffice/phpexcel": "^1.8",
         "phpoffice/phpspreadsheet": "^1.14",
-        "ramsey/uuid": "^4.1"
+        "ramsey/uuid": "^4.1",
+		"aws/aws-sdk-php-laravel": "~3.0",
+		"pda/pheanstalk": "~3.0"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.9.1",

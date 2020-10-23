@@ -13,6 +13,9 @@ use PDF;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
+use Illuminate\Support\Facades\Queue;
+use App\Jobs\ExampleJob;
+
 use App\Models\User;
 
 class IndexController extends Controller
@@ -42,7 +45,18 @@ error status code
       ])
 		->setStatusCode(200);
     }
-
+	
+	
+	public function test_queue() {
+		for($i=0; $i<=10; $i++){
+			Queue::push(new ExampleJob(array('queue' => $i)));
+			echo "successfully push";
+			echo '<br>';
+			echo '<br>';
+		}
+	}
+	
+	
     public function pdf()
     {
 

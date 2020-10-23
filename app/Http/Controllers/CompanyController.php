@@ -15,6 +15,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 use App\Models\User;
 use App\Models\Company;
+use App\Models\CompanyFulfillment;
 
 class CompanyController extends Controller
 {
@@ -65,7 +66,7 @@ class CompanyController extends Controller
 	
     public function detail(Request $request, $id){
 		$auth	= $request->auth;
-		$query = Company::where("company_id",$id)->first();
+		$query = Company::with('fulfillments.fulfillment')->where("company_id",$id)->first();
 		if($query){
 			if($auth->company_id == "OMS" || $auth->company_id == $request->company){
 				return response()
@@ -76,7 +77,7 @@ class CompanyController extends Controller
 					->setStatusCode(200);
 			}else{
 				return response()
-							->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ["product_code" => ["Product Id not registered."]]]])
+							->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ["company_code" => ["Company Code not registered."]]]])
 							->withHeaders([
 							  'Content-Type'          => 'application/json',
 							  ])
@@ -85,7 +86,7 @@ class CompanyController extends Controller
 			}
 		}else{
 			return response()
-						->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ["product_code" => ["Product Id not registered."]]]])
+						->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ["product_code" => ["Company Code not registered."]]]])
 						->withHeaders([
 						  'Content-Type'          => 'application/json',
 						  ])
@@ -102,6 +103,7 @@ class CompanyController extends Controller
             'address' 				=> 'required',
             'province' 				=> 'required|max:255',
             'city' 					=> 'required|max:255',
+            'fulfillments'			=> 'required',
             'area' 					=> 'max:255',
             'sub_area' 				=> 'max:255',
             'village' 				=> 'max:255',
@@ -125,7 +127,8 @@ class CompanyController extends Controller
 				  ])
 				->setStatusCode(422);
 		}else{
-		
+			$fulfillments	= json_decode($request->fulfillments,TRUE);
+			
 			$send = array(
 				'company_id' 	=> $request->company_code,
 				'name' 			=> $request->company_name,
@@ -148,6 +151,12 @@ class CompanyController extends Controller
 				); 
 			Company::create($send);
 			
+			$companyFulfillment	= [];
+			foreach($fulfillments as $fulfillment){
+					$companyFulfillment[]	= ['company_id' => $request->company_code , 'fulfillment_center_id' => $fulfillment['fulfillment_center_id'],'created_at' => date("Y-m-d H:i:s") , 'updated_at' => date("Y-m-d H:i:s")];
+			}
+			
+			CompanyFulfillment::insert($companyFulfillment);
 			
 			return response()
 				->json(['status'=>200 ,'datas' => ['message' => 'Add Successfully'], 'errors' => []])
@@ -167,7 +176,7 @@ class CompanyController extends Controller
 		if(!$cek){
 			
 			return response()
-					->json(['status'=>400 ,'datas' => [], 'errors' => ['fulfillment_center_id' => 'Data not available']])
+					->json(['status'=>400 ,'datas' => [], 'errors' => ['company_name' => 'Data not available']])
 					->withHeaders([
 					  'Content-Type'          => 'application/json',
 					  ])
@@ -181,6 +190,7 @@ class CompanyController extends Controller
 				'city' 					=> 'required|max:255',  
 				'area' 					=> 'max:255',  
 				'sub_area' 				=> 'max:255',  
+				'fulfillments'			=> 'required',
 				'village' 				=> 'max:255',  
 				'postal_code' 			=> 'required|max:6|without_spaces', 
 				'longitude' 			=> 'max:255',  
@@ -217,6 +227,17 @@ class CompanyController extends Controller
 			); 
 				
 			$cek->update($send);
+			
+			$fulfillments	= json_decode($request->fulfillments,TRUE);
+			
+			$companyFulfillment	= [];
+			foreach($fulfillments as $fulfillment){
+					$companyFulfillment[]	= ['company_id' => $id , 'fulfillment_center_id' => $fulfillment['fulfillment_center_id'],'created_at' => date("Y-m-d H:i:s") , 'updated_at' => date("Y-m-d H:i:s")];
+			}
+			
+			CompanyFulfillment::where('company_id',$id)->delete();
+			CompanyFulfillment::insert($companyFulfillment);
+			
 			
 			return response()
 					->json(['status'=>200 ,'datas' => ['message' => 'Update Successfully'], 'errors' => []])

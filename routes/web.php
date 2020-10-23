@@ -27,6 +27,7 @@ $router->group(['prefix' => 'root-system'], function () use ($router) {
     $router->get('/pdfencode',['as' => 'pdfencode','uses' => 'IndexController@pdfencode']);
     $router->get('/pdfdencode',['as' => 'pdfdencode','uses' => 'IndexController@pdfdencode']);
     $router->get('/test-log',['as' => 'testLog','uses' => 'IndexController@testLog']);
+    $router->get('/test-queue',['as' => 'testQueue','uses' => 'IndexController@test_queue']);
 
 });
 
@@ -42,6 +43,9 @@ $router->group(
 		$router->get('/country/index',['as' => 'countryIndex','uses' => 'CountryController@index']);
 		$router->get('/province/index',['as' => 'provinceIndex','uses' => 'AddressController@province']);
 		$router->get('/city/index',['as' => 'cityIndex','uses' => 'AddressController@city']);
+		$router->get('/area/index',['as' => 'areaIndex','uses' => 'AddressController@area']);
+		$router->get('/sub-area/index',['as' => 'subareaIndex','uses' => 'AddressController@subarea']);
+		$router->get('/postal-code/index',['as' => 'postalCodeIndex','uses' => 'AddressController@postalCode']);
 		
 		/*
 		*	Fulfillment

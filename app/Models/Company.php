@@ -25,7 +25,7 @@ class Company extends Model
 	
     public function fulfillments()
     {
-        return $this->belongsTo('App\Models\Company');
+        return $this->hasMany('App\Models\CompanyFulfillment','company_id');
     }
 	
 }
