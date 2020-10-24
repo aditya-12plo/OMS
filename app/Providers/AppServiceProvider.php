@@ -21,6 +21,8 @@ class AppServiceProvider extends ServiceProvider
 		app('validator')->extend('without_spaces', function ($attribute, $value) {
             return preg_match('/^\S*$/u', $value);
         });
+		
+		date_default_timezone_set(env('APP_TIMEZONE', 'Asia/Jakarta'));
 	}
     /**
      * Register any application services.

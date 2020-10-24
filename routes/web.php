@@ -74,6 +74,7 @@ $router->group(
         $router->get('/products/normal/detail/{id}',['as' => 'normalDetailProducts','uses' => 'ProductsController@normalDetailProducts']);
         $router->put('/products/normal/update/{id}',['as' => 'normalUpdateProducts','uses' => 'ProductsController@normalUpdateProducts']);
         $router->post('/products/normal/add',['as' => 'normalAddProducts','uses' => 'ProductsController@normalAddProducts']);
+        $router->post('/products/normal/download',['as' => 'downloadProducts','uses' => 'ProductsController@downloadProducts']);
 		
 		/*
 		*	UOM

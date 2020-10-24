@@ -2,10 +2,10 @@
 
 return [ 
 
-    'name' => 'OMS (Order Management System)', 
+    'name' 		=> 'OMS (Order Management System)', 
+	'debug'		=> env('APP_DEBUG', false),
+    'url' 		=> env('APP_URL', 'http://localhost:8000'),
 
-    'url' => env('APP_URL', 'http://localhost:8000'),
-
-    'timezone' => 'Asia/Jakarta',
+    'timezone'	=> env('APP_TIMEZONE', 'Asia/Jakarta'),
 
 ];

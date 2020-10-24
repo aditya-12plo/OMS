@@ -12,11 +12,15 @@ use Log;
 use PDF;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Writer\Xls;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 use App\Models\User;
 use App\Models\Products;
 use App\Models\FulfillmentCenter;
+use App\Models\CompanyFulfillment;
 use App\Models\Inventory;
 
 class ProductsController extends Controller
@@ -235,6 +239,26 @@ class ProductsController extends Controller
 						$check->time_to_live		= $product["time_to_live"];
 						$check->save();
 						
+						$productId	= $check->product_id;
+						
+						$fulfillments = CompanyFulfillment::where('company_id', $company)->get();
+						if(count($fulfillments) > 0){
+							foreach($fulfillments as $fulfillment){
+								$checkInventory		= Inventory::where([['product_id',$productId],['fulfillment_center_id',$fulfillment->fulfillment_center_id],['company_id',$company]])->first();
+								if(!$checkInventory){
+									$inventory								= new Inventory;
+									$inventory->product_id	 				= $productId;
+									$inventory->fulfillment_center_id	 	= $fulfillment->fulfillment_center_id;
+									$inventory->company_id	 				= $company;
+									$inventory->stock_on_hand 				= 0;
+									$inventory->stock_available				= 0;
+									$inventory->stock_hold	 				= 0;
+									$inventory->stock_booked 				= 0;
+									$inventory->save();
+								}								
+							}
+						}
+						
 						$respons[]		= ['product_code' => $product["product_code"] , 'status' => 'update data'];
 					}else{
 						$insert						= new Products;
@@ -256,6 +280,25 @@ class ProductsController extends Controller
 						$insert->time_to_live		= $product["time_to_live"];
 						$insert->type				= 'NORMAL';
 						$insert->save();
+						
+						
+						$productId	= $insert->product_id;
+						
+						$fulfillments = CompanyFulfillment::where('company_id', $company)->get();
+						if(count($fulfillments) > 0){
+							foreach($fulfillments as $fulfillment){
+								$inventory								= new Inventory;
+								$inventory->product_id	 				= $productId;
+								$inventory->fulfillment_center_id	 	= $fulfillment->fulfillment_center_id;
+								$inventory->company_id	 				= $company;
+								$inventory->stock_on_hand 				= 0;
+								$inventory->stock_available				= 0;
+								$inventory->stock_hold	 				= 0;
+								$inventory->stock_booked 				= 0;
+								$inventory->save();
+								
+							}
+						}
 						
 						$respons[]		= ['product_code' => $product["product_code"] , 'status' => 'insert data'];
 
@@ -336,7 +379,7 @@ class ProductsController extends Controller
 				
 				$productId	= $data->product_id;
 				
-				$fulfillments = FulfillmentCenter::where('company_id', $data->company_id)->get();
+				$fulfillments = CompanyFulfillment::where('company_id', $request->company)->get();
 				if(count($fulfillments) > 0){
 					foreach($fulfillments as $fulfillment){
 						$inventory								= new Inventory;
@@ -371,6 +414,129 @@ class ProductsController extends Controller
 		}
 	}
 	
+	
+    public function downloadProducts(Request $request){
+		
+		$auth					= $request->auth;
+		$file_name				= $request->file_name;
+		$product_description	= $request->product_description;
+        $product_code			= $request->product_code;
+        $company_id     		= $request->company_id;
+		$sort_field 			= "product_id";
+        $sort_type 				= "DESC";
+			
+			
+		if($auth->company_id == "OMS"){
+			$query = Products::with(['company','uom_description','inventory.fulfillment'])->orderBy($sort_field,$sort_type);
+		
+		
+			if ($company_id) {
+				$like = "%{$company_id}%";
+				$query = $query->where('company_id', 'LIKE', $like);
+			}
+					
+			if ($product_code) {
+				$like = "%{$product_code}%";
+				$query = $query->where('product_code', 'LIKE', $like);
+			}
+					
+			if ($product_description) {
+				$like = "%{$product_description}%";
+				$query = $query->where('product_description', 'LIKE', $like);
+			}
+		}else{
+			$query = Products::with(['uom_description','inventory'])->where('company_id', $auth->company_id)->orderBy($sort_field,$sort_type);
+							
+			if ($product_code) {
+				$like = "%{$product_code}%";
+				$query = $query->where('product_code', 'LIKE', $like);
+			}
+					
+			if ($product_description) {
+				$like = "%{$product_description}%";
+				$query = $query->where('product_description', 'LIKE', $like);
+			}
+		}
+		
+		$datas	= $query->get();
+		
+		
+		$file_path  	= storage_path('xlsx/download') . '/' . $file_name;
+		
+		$spreadsheet 	= new Spreadsheet();
+		$sheet 			= $spreadsheet->getActiveSheet();
+		$sheet->setCellValue('A1', 'Company ID');
+		$sheet->setCellValue('B1', 'Product Code');
+		$sheet->setCellValue('C1', 'Product Description');
+		$sheet->setCellValue('D1', 'UOM');
+		$sheet->setCellValue('E1', 'Price');
+		$sheet->setCellValue('F1', 'Width');
+		$sheet->setCellValue('G1', 'Height');
+		$sheet->setCellValue('H1', 'Weight');
+		$sheet->setCellValue('I1', 'Net Weight');
+		$sheet->setCellValue('J1', 'Gross Weight');
+		$sheet->setCellValue('K1', 'Qty Per Carton');
+		$sheet->setCellValue('L1', 'Carton Per Pallet');
+		$sheet->setCellValue('M1', 'Cube');
+		$sheet->setCellValue('N1', 'Currency');
+		$sheet->setCellValue('O1', 'Barcode');
+		$sheet->setCellValue('P1', 'Time To Live');
+		$sheet->setCellValue('Q1', 'Fulfillment');
+		$sheet->setCellValue('R1', 'Stock Available');
+		$sheet->setCellValue('S1', 'Stock On Hand');
+		$sheet->setCellValue('T1', 'Stock Hold');
+		$sheet->setCellValue('U1', 'Stock Booked');
+		$sheet->setCellValue('V1', 'Last Update Stock');
+		
+		if(count($datas) > 0){
+			$x=2;
+			foreach($datas as $data){
+				foreach($data->inventory as $inventory){
+					$sheet->setCellValue('A'.$x, $data->company->name.' ( '.$data->company->company_id.' )');
+					$sheet->setCellValue('B'.$x, $data->product_code);
+					$sheet->setCellValue('C'.$x, $data->product_description);
+					$sheet->setCellValue('D'.$x, $data->uom_description->uom_description.' ( '.$data->uom_description->uom_code.' )');
+					$sheet->setCellValue('E'.$x, $data->price);
+					$sheet->setCellValue('F'.$x, $data->width);
+					$sheet->setCellValue('G'.$x, $data->height);
+					$sheet->setCellValue('H'.$x, $data->weight);
+					$sheet->setCellValue('I'.$x, $data->net_weight);
+					$sheet->setCellValue('J'.$x, $data->gross_weight);
+					$sheet->setCellValue('K'.$x, $data->qty_per_carton);
+					$sheet->setCellValue('L'.$x, $data->carton_per_pallet);
+					$sheet->setCellValue('M'.$x, $data->cube);
+					$sheet->setCellValue('N'.$x,  $data->currency);
+					$sheet->setCellValue('O'.$x, $data->barcode);
+					$sheet->setCellValue('P'.$x, $data->time_to_live);
+					$sheet->setCellValue('Q'.$x, $inventory->fulfillment->name.' ( '.$inventory->fulfillment->code.' )');
+					$sheet->setCellValue('R'.$x, $inventory->stock_available);
+					$sheet->setCellValue('S'.$x, $inventory->stock_on_hand);
+					$sheet->setCellValue('T'.$x, $inventory->stock_hold);
+					$sheet->setCellValue('U'.$x, $inventory->stock_booked);
+					$sheet->setCellValue('V'.$x, $inventory->updated_at);
+					
+					$x++;
+				}
+			}
+		}
+
+		$writer = new Xlsx($spreadsheet);
+		$writer->save($file_path); 
+		 $headers	= ['Content-Type' => 'application/vnd.ms-excel', 'Content-Disposition' => 'attachment'];
+		if (file_exists($file_path)) {
+		  $file = file_get_contents($file_path);
+		  $res = response($file, 200)->withHeaders(['Content-Type' => 'application/vnd.ms-excel', 'Content-Disposition' => 'attachment;filename="'.$file_name.'"']);
+		   register_shutdown_function('unlink', $file_path);
+		   return $res;
+		}else{
+			return response()
+					->json(['status'=>500 ,'datas' => [], 'errors' => ['product_code' => 'download file error']])
+					->withHeaders([
+						'Content-Type'          => 'application/json',
+					  ])
+					->setStatusCode(500);
+		}
+	}
 	
     public function normalUpdateProducts(Request $request, $id){
 		$auth	= $request->auth;
