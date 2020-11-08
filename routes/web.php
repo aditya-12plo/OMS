@@ -28,6 +28,7 @@ $router->group(['prefix' => 'root-system'], function () use ($router) {
     $router->get('/pdfdencode',['as' => 'pdfdencode','uses' => 'IndexController@pdfdencode']);
     $router->get('/test-log',['as' => 'testLog','uses' => 'IndexController@testLog']);
     $router->get('/test-queue',['as' => 'testQueue','uses' => 'IndexController@test_queue']);
+    $router->get('/php-aes-gcm',['as' => 'testQueue','uses' => 'IndexController@testAesGcm']);
 
 });
 
@@ -75,6 +76,11 @@ $router->group(
         $router->put('/products/normal/update/{id}',['as' => 'normalUpdateProducts','uses' => 'ProductsController@normalUpdateProducts']);
         $router->post('/products/normal/add',['as' => 'normalAddProducts','uses' => 'ProductsController@normalAddProducts']);
         $router->post('/products/normal/download',['as' => 'downloadProducts','uses' => 'ProductsController@downloadProducts']);
+		
+		$router->get('/products/bundle/index',['as' => 'bundleProducts','uses' => 'ProductsController@bundleProducts']);
+		$router->post('/products/bundle/add',['as' => 'bundleAddProducts','uses' => 'ProductsController@bundleAddProducts']);
+		$router->get('/products/bundle/detail/{id}',['as' => 'bundleDetailProducts','uses' => 'ProductsController@bundleDetailProducts']);
+		
 		
 		/*
 		*	UOM

@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 use App\Models\User;
 use App\Models\Products;
+use App\Models\ProductsKit;
 use App\Models\FulfillmentCenter;
 use App\Models\CompanyFulfillment;
 use App\Models\Inventory;
@@ -29,8 +30,12 @@ class ProductsController extends Controller
 		$this->middleware('jwt.auth');
     }
 	
+	/*
+	* Bundle Products
+	*/
 	
-    public function normalProducts(Request $request){
+	
+    public function bundleProducts(Request $request){
 		$auth					= $request->auth;
         $perPage        		= $request->per_page;
         $sort_field     		= $request->sort_field;
@@ -47,7 +52,241 @@ class ProductsController extends Controller
         }
 		
 		if($auth->company_id == "OMS"){
-			$query = Products::with(['company','uom_description','inventory.fulfillment'])->orderBy($sort_field,$sort_type);
+			$query = Products::with(['company','uom_description','inventory.fulfillment','bundle.product'])->where('type', 'BUNDLE')->orderBy($sort_field,$sort_type);
+		
+		
+			if ($company_id) {
+				$like = "%{$company_id}%";
+				$query = $query->where('company_id', 'LIKE', $like);
+			}
+					
+			if ($product_code) {
+				$like = "%{$product_code}%";
+				$query = $query->where('product_code', 'LIKE', $like);
+			}
+					
+			if ($product_description) {
+				$like = "%{$product_description}%";
+				$query = $query->where('product_description', 'LIKE', $like);
+			}
+			
+					
+			if ($price) {
+				$query = $query->whereRaw('price '.$price);
+			}
+			
+		}else{
+			$query = Products::with(['uom_description','inventory'])->where([['company_id', $auth->company_id],['type', 'BUNDLE']])->orderBy($sort_field,$sort_type);
+							
+			if ($product_code) {
+				$like = "%{$product_code}%";
+				$query = $query->where('product_code', 'LIKE', $like);
+			}
+					
+			if ($product_description) {
+				$like = "%{$product_description}%";
+				$query = $query->where('product_description', 'LIKE', $like);
+			}
+					
+			if ($price) {
+				$query = $query->whereRaw('price '.$price);
+			}
+		}
+		
+		return $query->paginate($perPage);
+    }
+	
+	
+	
+    public function bundleAddProducts(Request $request){
+		$auth	= $request->auth;
+		if($auth->company_id == "OMS" || $auth->company_id == $request->company){
+			$this->validate($request, [
+					'product_code' 			=> 'required|max:255|without_spaces', 
+					'company' 				=> 'required|max:255',
+					'product_name' 			=> 'required|max:255',  
+					'uom_code' 				=> 'required|max:255',
+					'price' 				=> "required|regex:/^\d*(\.\d{1,2})?$/",
+					'width' 				=> "required|regex:/^\d*(\.\d{1,2})?$/",
+					'height' 				=> "required|regex:/^\d*(\.\d{1,2})?$/",
+					'weight' 				=> "required|regex:/^\d*(\.\d{1,2})?$/",
+					'net_weight'			=> "required|regex:/^\d*(\.\d{1,2})?$/",
+					'gross_weight'			=> "required|regex:/^\d*(\.\d{1,2})?$/",
+					'qty_per_carton'		=> "required|regex:/^\d*(\.\d{1,2})?$/",
+					'carton_per_pallet'		=> "required|regex:/^\d*(\.\d{1,2})?$/",
+					'cube'					=> "required|regex:/^\d*(\.\d{1,2})?$/", 
+					'currency' 				=> 'required|max:255',
+					'barcode' 				=> 'max:255',
+					'time_to_live' 			=> 'required|in:0,1',
+					'product_components' 	=> 'required'
+				]);
+				
+			$checkCode	= Products::where([["company_id",$request->company],["product_code",$request->product_code]])->first();
+			if($checkCode){
+					return response()
+						->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ["product_code" => ["Product Code has been registered."]]]])
+						->withHeaders([
+						  'Content-Type'          => 'application/json',
+						  ])
+						->setStatusCode(422);
+					
+			}else{
+				$array	= json_decode($request->product_components,TRUE);
+				if(count($array) > 0){
+					if($this->checkBundleSku($array)){
+						return response()
+								->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ['product_components' => ['Product Components must be different and produtc qty must be > 0']]]])
+								->withHeaders([
+									'Content-Type'          => 'application/json',
+								  ])
+								->setStatusCode(422);
+					}else{
+						
+							$data 						= new Products;
+							$data->product_code 		= $request->product_code;
+							$data->company_id 			= $request->company;
+							$data->product_description 	= $request->product_name;
+							$data->uom_code 			= $request->uom_code;
+							$data->price 				= $request->price;
+							$data->width 				= $request->width;
+							$data->height 				= $request->height;
+							$data->weight 				= $request->weight;
+							$data->net_weight			= $request->net_weight;
+							$data->gross_weight			= $request->gross_weight;
+							$data->qty_per_carton		= $request->qty_per_carton;
+							$data->carton_per_pallet	= $request->carton_per_pallet;
+							$data->cube					= $request->cube;
+							$data->currency				= $request->currency;
+							$data->barcode				= $request->barcode;
+							$data->time_to_live			= $request->time_to_live;
+							$data->type					= 'BUNDLE';
+							$data->save();
+							
+							$productId	= $data->product_id;
+							
+							$fulfillments = CompanyFulfillment::where('company_id', $request->company)->get();
+							if(count($fulfillments) > 0){
+								foreach($fulfillments as $fulfillment){
+									$inventory								= new Inventory;
+									$inventory->product_id	 				= $productId;
+									$inventory->fulfillment_center_id	 	= $fulfillment->fulfillment_center_id;
+									$inventory->company_id	 				= $request->company;
+									$inventory->stock_on_hand 				= 0;
+									$inventory->stock_available				= 0;
+									$inventory->stock_hold	 				= 0;
+									$inventory->stock_booked 				= 0;
+									$inventory->save();
+									
+								}
+							}
+							
+							foreach($array as $bundle){
+								$kit							= new ProductsKit;
+								$kit->product_id	 			= $productId;
+								$kit->product_id_component	 	= (int) $bundle["product_id"];
+								$kit->qty	 					= $bundle["product_qty"];
+								$kit->save();								
+							}
+							
+							
+							return response()
+								->json(['status'=>200 ,'datas' => ['message' => 'Add Successfully'], 'errors' => []])
+								->withHeaders([
+								  'Content-Type'          => 'application/json',
+								  ])
+								->setStatusCode(200);
+						
+					}
+				}else{
+					
+					return response()
+							->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ['product_components' => ['Product Components Required']]]])
+							->withHeaders([
+								'Content-Type'          => 'application/json',
+							  ])
+							->setStatusCode(422);
+				}
+			}
+		}else{
+			return response()
+					->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ['product_code' => ['Data not available']]]])
+					->withHeaders([
+						'Content-Type'          => 'application/json',
+					  ])
+					->setStatusCode(422);
+			
+		}
+	}
+	
+	private function checkBundleSku($array) {
+		$dupe_array = array();
+		foreach ($array as $val) {
+			if (in_array($val["product_id"],$dupe_array)) {
+				return true;
+			}else{
+				array_push($dupe_array,$val["product_id"]);
+			}
+			if($val["product_qty"] <= 0){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
+    public function bundleDetailProducts(Request $request, $id){
+		$auth	= $request->auth;
+		$query = Products::with(['company','uom_description','inventory.fulfillment','bundle.product'])->where([["product_id",$id],['type','BUNDLE']])->first();
+		if($query){
+			if($auth->company_id == "OMS" || $auth->company_id == $request->company){
+				return response()
+					->json(['status'=>200 ,'datas' => $query, 'errors' => []])
+					->withHeaders([
+					  'Content-Type'          => 'application/json',
+					  ])
+					->setStatusCode(200);
+			}else{
+				return response()
+							->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ["product_code" => ["Product Id not registered."]]]])
+							->withHeaders([
+							  'Content-Type'          => 'application/json',
+							  ])
+							->setStatusCode(422);
+				
+			}
+		}else{
+			return response()
+						->json(['status'=>422 ,'datas' => [], 'errors' => ['message' => ["product_code" => ["Product Id not registered."]]]])
+						->withHeaders([
+						  'Content-Type'          => 'application/json',
+						  ])
+						->setStatusCode(422);
+			
+		}
+	}
+	
+	/*
+	* Normal Products
+	*/
+    
+	public function normalProducts(Request $request){
+		$auth					= $request->auth;
+        $perPage        		= $request->per_page;
+        $sort_field     		= $request->sort_field;
+        $sort_type      		= $request->sort_type;
+		
+        $company_id     		= $request->company_id;
+        $product_description	= $request->product_description;
+        $product_code			= $request->product_code;
+        $price					= $request->price;
+		
+        if(!$sort_field){
+            $sort_field = "product_id";
+            $sort_type = "DESC";
+        }
+		
+		if($auth->company_id == "OMS"){
+			$query = Products::with(['company','uom_description','inventory.fulfillment'])->where('type', 'NORMAL')->orderBy($sort_field,$sort_type);
 		
 		
 			if ($company_id) {
@@ -95,7 +334,7 @@ class ProductsController extends Controller
 	
     public function normalDetailProducts(Request $request, $id){
 		$auth	= $request->auth;
-		$query = Products::with(['company','uom_description','inventory.fulfillment'])->where("product_id",$id)->first();
+		$query = Products::with(['company','uom_description','inventory.fulfillment'])->where([["product_id",$id],['type','NORMAL']])->first();
 		if($query){
 			if($auth->company_id == "OMS" || $auth->company_id == $request->company){
 				return response()
@@ -374,7 +613,7 @@ class ProductsController extends Controller
 				$data->currency				= $request->currency;
 				$data->barcode				= $request->barcode;
 				$data->time_to_live			= $request->time_to_live;
-				$data->type					= 'normal';
+				$data->type					= 'NORMAL';
 				$data->save();
 				
 				$productId	= $data->product_id;
@@ -405,11 +644,11 @@ class ProductsController extends Controller
 			}
 		}else{
 			return response()
-					->json(['status'=>400 ,'datas' => [], 'errors' => ['product_code' => 'Data not available']])
+					->json(['status'=>422 ,'datas' => [], 'errors' => ['product_code' => 'Data not available']])
 					->withHeaders([
 						'Content-Type'          => 'application/json',
 					  ])
-					->setStatusCode(400);
+					->setStatusCode(422);
 			
 		}
 	}
@@ -427,7 +666,7 @@ class ProductsController extends Controller
 			
 			
 		if($auth->company_id == "OMS"){
-			$query = Products::with(['company','uom_description','inventory.fulfillment'])->orderBy($sort_field,$sort_type);
+			$query = Products::with(['company','uom_description','inventory.fulfillment'])->where('type', 'NORMAL')->orderBy($sort_field,$sort_type);
 		
 		
 			if ($company_id) {
@@ -445,7 +684,7 @@ class ProductsController extends Controller
 				$query = $query->where('product_description', 'LIKE', $like);
 			}
 		}else{
-			$query = Products::with(['uom_description','inventory'])->where('company_id', $auth->company_id)->orderBy($sort_field,$sort_type);
+			$query = Products::with(['uom_description','inventory'])->where([['company_id', $auth->company_id],['type', 'NORMAL']])->orderBy($sort_field,$sort_type);
 							
 			if ($product_code) {
 				$like = "%{$product_code}%";
@@ -544,18 +783,18 @@ class ProductsController extends Controller
 		
 		if(!$cek){
 			return response()
-					->json(['status'=>400 ,'datas' => [], 'errors' => ['product_code' => 'Data not available']])
+					->json(['status'=>422 ,'datas' => [], 'errors' => ['product_code' => 'Data not available']])
 					->withHeaders([
 						'Content-Type'          => 'application/json',
 					  ])
-					->setStatusCode(400);
+					->setStatusCode(422);
 		}elseif($cek->type == 'BUNDLE'){
 			return response()
-					->json(['status'=>400 ,'datas' => [], 'errors' => ['product_code' => 'Data not available']])
+					->json(['status'=>422 ,'datas' => [], 'errors' => ['product_code' => 'Data not available']])
 					->withHeaders([
 						'Content-Type'          => 'application/json',
 					  ])
-					->setStatusCode(400);
+					->setStatusCode(422);
 			
 		}else{
 			if($auth->company_id == "OMS" || $auth->company_id == $request->company){
@@ -618,11 +857,11 @@ class ProductsController extends Controller
 				}
 			}else{
 				return response()
-						->json(['status'=>400 ,'datas' => [], 'errors' => ['product_code' => 'Data not available']])
+						->json(['status'=>422 ,'datas' => [], 'errors' => ['product_code' => 'Data not available']])
 						->withHeaders([
 						  'Content-Type'          => 'application/json',
 						  ])
-						->setStatusCode(400);
+						->setStatusCode(422);
 				
 			}
 		}		

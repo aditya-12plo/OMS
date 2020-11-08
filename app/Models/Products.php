@@ -33,5 +33,10 @@ class Products extends Model
     {
 		return $this->hasMany('App\Models\Inventory','product_id');        
     }
+	
+    public function bundle()
+    {
+		return $this->hasMany('App\Models\ProductsKit','product_id');        
+    }
   
 }

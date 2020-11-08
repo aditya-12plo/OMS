@@ -12,7 +12,7 @@ use Log;
 use PDF;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-
+use AESGCM\AESGCM;
 use Illuminate\Support\Facades\Queue;
 use App\Jobs\ExampleJob;
 
@@ -252,6 +252,24 @@ error status code
    }
 
 
+   
+   public function testAesGcm()
+   {
+		// The Key Encryption Key
+		$K = hex2bin('079423bc31698dbaf2d6f49973301b97');
+
+		// The data to encrypt (can be null for authentication)
+		$P = null;
+
+		// Additional Authenticated Data
+		$A = '+oY3RKkVzstJjpaBz523z9960f/KKNfV1hrYW9bUVJ0AMwwQQfa0Zi09VH3WGac8qPpZkRodMxBIMl7suYD8ck95JI4K1mnO84nacf9sh0y8577N0zYWfhaIaapiFi/ZbX3J0aJr3gMjSk+/fIjXw99kTjZEEyDtvqyvc8K8XDaa4uQbAz10Vpf61+6I7cPKfXmdWUD53ZLweoLQZfLhnH1XK3bheX6SKRR33N/NzEwE/qbaANs2f6OL7HhjyiR58BEjg+At9c26pD5n170JoadgKVjsLZk0L2+2zMJKHuxnjtm8KxqimObZB2riIXmobA2tZmQQBx2CQGwDeqeUkxbO+uxxfb4sWKeViU90QpfDNqCTELiTkS0KnVpadzSt908rdx7w3lFuIDbqZXwClutORdASz2s1t856aLnT89UT1Tm25MWcX0kAGIaw8xYwOdoUEyk0g+4d0ZVcGUDFlU2L/8mQ9jG4YTAm/9dQH57o1g==';
+
+		// Initialization Vector
+		$IV = hex2bin('z7bBO5GmaW12EBdU');
+
+		$P = AESGCM::decrypt($K, $IV, $P, $A, $T="256");
+		echo $P;
+   }
    
    public function testLog()
    {
