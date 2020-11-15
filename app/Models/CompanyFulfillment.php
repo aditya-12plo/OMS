@@ -19,4 +19,9 @@ class CompanyFulfillment extends Model
         return $this->belongsTo('App\Models\FulfillmentCenter','fulfillment_center_id');
     }
 	
+    public function company()
+    {
+        return $this->belongsTo('App\Models\Company','company_id');
+    }
+	
 }

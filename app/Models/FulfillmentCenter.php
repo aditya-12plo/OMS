@@ -20,6 +20,11 @@ class FulfillmentCenter extends Model
     public function inventorys()
     {
 		return $this->hasMany('App\Models\Inventory','fulfillment_center_id');
-        
     }
+	
+    public function locations()
+    {
+		return $this->hasMany('App\Models\Locations','fulfillment_center_id');
+    }
+	
 }

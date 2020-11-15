@@ -80,6 +80,26 @@ $router->group(
 		$router->get('/products/bundle/index',['as' => 'bundleProducts','uses' => 'ProductsController@bundleProducts']);
 		$router->post('/products/bundle/add',['as' => 'bundleAddProducts','uses' => 'ProductsController@bundleAddProducts']);
 		$router->get('/products/bundle/detail/{id}',['as' => 'bundleDetailProducts','uses' => 'ProductsController@bundleDetailProducts']);
+        $router->put('/products/bundle/update/{id}',['as' => 'bundleUpdateProducts','uses' => 'ProductsController@bundleUpdateProducts']);
+        $router->get('/products/bundle/template/{type}',['as' => 'templateBundleProducts','uses' => 'FilesController@productBundleDownload']);
+        $router->post('/products/bundle/upload',['as' => 'uploadBundleProducts','uses' => 'ProductsController@uploadBundleProducts']);
+        $router->post('/products/bundle/download',['as' => 'downloadBundleProducts','uses' => 'ProductsController@downloadBundleProducts']);
+		
+		$router->get('/products/damage/index',['as' => 'damageProducts','uses' => 'ProductsDamageController@index']);
+		$router->get('/products/damage/detail/{id}',['as' => 'damageDetailProducts','uses' => 'ProductsDamageController@detail']);
+        $router->post('/products/damage/add',['as' => 'damageAddProducts','uses' => 'ProductsDamageController@store']);
+        $router->post('/products/damage/upload',['as' => 'damageUploadProducts','uses' => 'ProductsDamageController@upload']);
+        $router->post('/products/damage/update-status',['as' => 'damageUpdateStatusProducts','uses' => 'ProductsDamageController@updateStatus']);
+        $router->post('/products/damage/download',['as' => 'damageDownloadProducts','uses' => 'ProductsDamageController@download']);
+        $router->put('/products/damage/update/{id}',['as' => 'damageUpdateProducts','uses' => 'ProductsDamageController@update']);
+        $router->get('/products/damage/template/{type}',['as' => 'templateDamageProducts','uses' => 'FilesController@productDamageDownload']);
+		
+		
+		/*
+		*	Locations
+		*/
+        $router->get('/locations/index',['as' => 'locationIndex','uses' => 'LocationsController@index']);
+        $router->get('/locations/company-fulfillments',['as' => 'locationTotal','uses' => 'LocationsController@companyFulfillments']);
 		
 		
 		/*
