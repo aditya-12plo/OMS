@@ -40,7 +40,7 @@ class AddressController extends Controller
             $sort_type = "ASC";
         }
 		
-		$query = Address::distinct()->select('country_name','province')->orderBy($sort_field,$sort_type);
+		$query = Address::distinct()->select('province')->orderBy($sort_field,$sort_type);
 		
 		
 		if ($country) {

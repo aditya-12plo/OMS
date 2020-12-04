@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Queue;
 use App\Jobs\ExampleJob;
 
 use App\Models\User;
+use App\Models\FulfillmentCenterType;
 
 class IndexController extends Controller
 {
@@ -273,22 +274,12 @@ error status code
    
    public function testLog()
    {
-		$file_path  	= storage_path('xlsx/download') . '/download_25_10_2020_00_26_47.xlsx';
-		 $headers	= ['Content-Type' => 'application/vnd.ms-excel', 'Content-Disposition' => 'attachment'];
-		if (file_exists($file_path)) {
-		  $file = file_get_contents($file_path);
-		   
-		   $res = response($file, 200)->withHeaders(['Content-Type' => 'application/vnd.ms-excel', 'Content-Disposition' => 'attachment;filename="download_25_10_2020_00_26_47.xlsx"']);
-		   register_shutdown_function('unlink', $file_path);
-		   return $res;
-		}else{
-			return response()
-					->json(['status'=>500 ,'datas' => [], 'errors' => ['product_code' => 'download file error']])
-					->withHeaders([
-						'Content-Type'          => 'application/json',
-					  ])
-					->setStatusCode(500);
-		}
+      
+      $result = FulfillmentCenterType::select('fulfillment_center_type_id')->orderBy("fulfillment_center_type_id","DESC")->pluck('fulfillment_center_type_id');
+    //   $result = array_map(function ($value) {
+    //     return (array)$value;
+    // }, $result);
+      echo $result;
    }
 
 }

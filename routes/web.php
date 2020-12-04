@@ -65,7 +65,17 @@ $router->group(
         $router->post('/company/add',['as' => 'companyAdd','uses' => 'CompanyController@store']);
         $router->put('/company/update/{id}',['as' => 'companyUpdate','uses' => 'CompanyController@update']);
         $router->put('/company/update-status/{id}',['as' => 'companyUpdate','uses' => 'CompanyController@updateStatus']);
-		
+
+
+		/*
+		*	Fulfillment Center Type
+		*/
+        $router->get('/fulfillment-type/get-all',['as' => 'fulfillmentCenterTypeGetAl','uses' => 'FulfillmentCenterTypeController@getAllType']);
+        $router->get('/fulfillment-type/index',['as' => 'fulfillmentCenterTypeIndex','uses' => 'FulfillmentCenterTypeController@index']);
+        $router->get('/fulfillment-type/detail/{id}',['as' => 'fulfillmentCenterTypeDetail','uses' => 'FulfillmentCenterTypeController@detail']);
+        $router->post('/fulfillment-type/add',['as' => 'fulfillmentCenterTypeAdd','uses' => 'FulfillmentCenterTypeController@store']);
+        $router->put('/fulfillment-type/update/{id}',['as' => 'fulfillmentCenterTypeUpdate','uses' => 'FulfillmentCenterTypeController@update']);
+  
 		/*
 		*	Products
 		*/

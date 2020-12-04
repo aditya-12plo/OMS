@@ -34,6 +34,7 @@ class FulfillmentCenterController extends Controller
 		
         $code     				= $request->code;
         $name     				= $request->name;
+        $fulfillment_center_type_id	= $request->fulfillment_center_type_id;
         $status     			= $request->status;
 		
         if(!$sort_field){
@@ -52,6 +53,11 @@ class FulfillmentCenterController extends Controller
 			if ($name) {
 				$like = "%{$name}%";
 				$query = $query->where('name', 'LIKE', $like);
+			}
+			
+			if ($fulfillment_center_type_id) {
+				$like = "%{$fulfillment_center_type_id}%";
+				$query = $query->where('fulfillment_center_type_id', 'LIKE', $like);
 			}
 			
 			if ($status) {
@@ -100,6 +106,7 @@ class FulfillmentCenterController extends Controller
 				'postal_code' 			=> 'required|max:6|without_spaces', 
 				'longitude' 			=> 'max:255',  
 				'latitude' 				=> 'max:255',  
+				'fulfillment_center_type'	=> 'max:255',  
 				'status' 				=> 'required|in:ACTIVATE,DEACTIVATE',  
 				'pic_name' 				=> 'required|max:255',  
 				'pic_phone' 			=> 'max:10',  
@@ -140,6 +147,7 @@ class FulfillmentCenterController extends Controller
 				$data->mobile				= $request->pic_mobile;
 				$data->fax					= $request->pic_fax;
 				$data->email				= $request->pic_email;
+				$data->fulfillment_center_type_id	= $request->fulfillment_center_type;
 				$data->status				= $request->status;
 				$data->save();
 				
@@ -197,6 +205,7 @@ class FulfillmentCenterController extends Controller
 					'pic_phone' 			=> 'max:10',  
 					'pic_fax' 				=> 'max:12',  
 					'country' 				=> 'required|max:255',  
+					'fulfillment_center_type'=> 'required|max:255',  
 					'pic_email' 			=> 'max:255|email',  
 					'pic_mobile' 			=> 'max:12'
 				]);
@@ -231,6 +240,7 @@ class FulfillmentCenterController extends Controller
 					'mobile' 		=> $request->pic_mobile,
 					'fax' 			=> $request->pic_fax,
 					'email' 		=> $request->pic_email,
+					'fulfillment_center_type_id' 		=> $request->fulfillment_center_type,
 					'status' 		=> $request->status
 					); 
 					
