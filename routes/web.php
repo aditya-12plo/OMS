@@ -15,6 +15,8 @@ $router->get('/',['as' => 'index','uses' => 'IndexController@index']);
 
 
 $router->post('/login',['as' => 'userLogin','uses' => 'Auth\LoginController@authenticate']);
+$router->post('/password/email',['as' => 'userPasswordEmail','uses' => 'Auth\PasswordController@postEmail']);
+$router->post('/password/reset/{token}',['as' => 'userPasswordToken','uses' => 'Auth\PasswordController@postReset']);
 
 
 

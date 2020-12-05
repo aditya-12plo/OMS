@@ -18,6 +18,9 @@ use App\Jobs\ExampleJob;
 
 use App\Models\User;
 use App\Models\FulfillmentCenterType;
+use App\Models\PasswordReset;
+use Mail;
+use Illuminate\Support\Str;
 
 class IndexController extends Controller
 {
@@ -34,7 +37,7 @@ error status code
 */
     public function __construct()
     {
-        //
+      $this->frontUrl = "http://localhost:8080/reset-password/";
     }
 
     public function index()
@@ -274,12 +277,14 @@ error status code
    
    public function testLog()
    {
-      
-      $result = FulfillmentCenterType::select('fulfillment_center_type_id')->orderBy("fulfillment_center_type_id","DESC")->pluck('fulfillment_center_type_id');
-    //   $result = array_map(function ($value) {
-    //     return (array)$value;
-    // }, $result);
-      echo $result;
+		// 	$send = ["link" => '12121212'];
+    // $content = view('emails.password')->with($send);
+    // Mail::send('layouts.email', ['contentMessage' => $content], function($message) {
+    //     $message->to('nugrohoaditya10@gmail.com')->subject('Demo Account Out Of Stock');
+    //     $message->from('info@rajawalikapital.co.id','Website Admin');
+    //  });
+      // echo $this->frontUrl;
+     
    }
 
 }
